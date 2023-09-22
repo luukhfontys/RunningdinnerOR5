@@ -36,7 +36,7 @@ def ingest_deelnemers(file_path: str) -> dict:
     #Alle directe buren opslaan per deelnemer
     df_directe_buren = pd.read_excel('Running Dinner dataset 2022.xlsx', sheet_name = 'Buren', skiprows=[0])
     for i in range(len(df_directe_buren)):
-        deelnemers[df_directe_buren.iloc[i, 0]].buren.append(deelnemers[df_directe_buren.iloc[i, 1]])
+        deelnemers[df_directe_buren.iloc[i, 0]].buren.append(deelnemers[df_directe_buren.iloc[i, 1]].naam)
     
     return deelnemers
 
@@ -45,8 +45,8 @@ def ingest_huizen(file_path: str) -> dict:
     
     #Input waardes voor huizen
     df_huizen = pd.read_excel(file_path, sheet_name = 'Adressen')
-    df_huizen.dropna(subset= 'Min groepsgrootte',inplace=True)
-    df_huizen.reset_index(inplace=True,drop=True)
+    # df_huizen.dropna(subset= 'Min groepsgrootte',inplace=True)
+    # df_huizen.reset_index(inplace=True,drop=True)
 
     huizen = dict()
 

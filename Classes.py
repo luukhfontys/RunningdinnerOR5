@@ -37,7 +37,7 @@ class Deelnemer:
                 attribuut_strings.append(f"{key}: {value}")
                 
         return ", ".join(attribuut_strings)
-        
+
 class Huis:
     def __init__(self, adres, min_gasten, max_gasten):
         self.adres = adres
@@ -46,3 +46,10 @@ class Huis:
         self.gasten = []
         self.gang_voorkeur = None
         self.voorbereidde_gang = None
+        
+    def gast_toevoeg(self, gast: str):
+        self.gasten.append(gast)
+    
+    @property
+    def aantalgasten(self):
+        return len(self.gasten)
