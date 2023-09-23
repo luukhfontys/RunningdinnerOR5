@@ -8,11 +8,6 @@ def ingest_deelnemers(file_path: str) -> dict:
     #Alle deelnemers in een dataframe zetten
     df_deelnemers = pd.read_excel('Running Dinner dataset 2022.xlsx', sheet_name = 'Bewoners')
 
-    #Alle woningen waar gekookt wordt in een dataframe zetten
-    df_woningen = pd.read_excel('Running Dinner dataset 2022.xlsx', sheet_name = 'Adressen')
-    df_woningen.dropna(subset = 'Min groepsgrootte', inplace = True)
-    df_woningen.reset_index(inplace = True, drop = True)
-
     deelnemers = dict()
 
     # Voeg alles namen en adressen van deelnemers toe in dictionary van classes
@@ -23,7 +18,6 @@ def ingest_deelnemers(file_path: str) -> dict:
         deelnemers[deelnemer.naam] = deelnemer
 
     #Sla op wie er bij elkaar moet blijven
-
     df_bijelkaar = pd.read_excel('Running Dinner dataset 2022.xlsx', sheet_name = 'Paar blijft bij elkaar', skiprows=[0])
 
     for index, row in df_bijelkaar.iterrows():
@@ -43,8 +37,9 @@ def ingest_deelnemers(file_path: str) -> dict:
 def ingest_huizen(file_path: str) -> dict:
     """Neemt de file path van xlsx en stopt alles in een dictionary van objecten"""
     
-    #Input waardes voor huizen
+    #Input waardes voor huizen en deelnemers
     df_huizen = pd.read_excel(file_path, sheet_name = 'Adressen')
+    df_deelnemers = pd.read_excel('Running Dinner dataset 2022.xlsx', sheet_name = 'Bewoners')
     # df_huizen.dropna(subset= 'Min groepsgrootte',inplace=True)
     # df_huizen.reset_index(inplace=True,drop=True)
 
@@ -55,9 +50,34 @@ def ingest_huizen(file_path: str) -> dict:
         min_gasten = row['Min groepsgrootte']
         max_gasten = row['Max groepsgrootte']
         gang_voorkeur = row['Voorkeur gang']
-
+        
         huis = Huis(adres, min_gasten, max_gasten)
         if not pd.isna(gang_voorkeur):
             huis.gang_voorkeur = gang_voorkeur
         huizen[huis.adres] = huis
+    
+    #bijhouden welke bewoners waar wonen en of ze vrijstelling van koken hebben of niet
+    for index, row in df_deelnemers.iterrows():
+        huizen[row['Huisadres']].bewoners.append(row['Bewoner'])
+        
+        if row['Kookt niet'] == 1:
+            huizen[row['Huisadres']].kook_vrijstelling = True
     return huizen
+
+def ingest_startoplossing(deelnemers: dict, huizen: dict, startoplossing_path: str) -> tuple[dict, dict]:
+    
+    #Start oplossing in dataframe zetten
+    df_startoplossing = pd.read_excel(startoplossing_path)
+
+    #voor hoofd, nagerecht bij deelnemers in de class zetten, en voorkeursgang in huis classes opslaan
+    for i in range(len(df_startoplossing)):
+        
+        deelnemers[df_startoplossing['Bewoner'][i]].voor = df_startoplossing['Voor'][i]
+        deelnemers[df_startoplossing['Bewoner'][i]].hoofd = df_startoplossing['Hoofd'][i]
+        deelnemers[df_startoplossing['Bewoner'][i]].na = df_startoplossing['Na'][i]
+        huizen[df_startoplossing['Huisadres'][i]].voorbereidde_gang = df_startoplossing['kookt'][i]
+        
+        #Gasten per huis class gasten lijst vermelden
+        for gang in ['Voor', 'Hoofd', 'Na']:
+            huizen[df_startoplossing[gang][i]].gast_toevoeg(deelnemers[df_startoplossing['Bewoner'][i]].naam)
+    return deelnemers, huizen
