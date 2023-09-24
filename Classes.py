@@ -37,6 +37,14 @@ class Deelnemer:
                 attribuut_strings.append(f"{key}: {value}")
                 
         return ", ".join(attribuut_strings)
+    
+    @property
+    def drie_gangen_test(self): # 3 gangen per persoon ingeroosterd constraint.
+        return None not in [self.voor, self.hoofd, self.na]
+    
+    @property #Feasibility voor hele class
+    def deelnemer_feasible(self) -> bool:
+        return all([self.drie_gangen_test])
 
 class Huis:
     def __init__(self, adres, min_gasten, max_gasten):
@@ -60,10 +68,15 @@ class Huis:
     def binnen_capaciteit(self) -> bool:
         return self.aantalgasten <= self.max_gasten
     
-    @property #min_gasten soft constraint
+    @property #min_gasten constraint
     def minima_capaciteit_behaald(self) -> bool:
         return self.aantalgasten >= self.min_gasten
     
-    @property #Bewoners op eigen adres koken constraint
+    @property #Bewoners koken op eigen adres constraint
     def bewoners_koken_thuis(self) -> bool:
         return all(bewoner in self.gasten for bewoner in self.bewoners)
+    
+    @property #Feasibility voor hele class
+    def huis_feasible(self) -> bool:
+        #Return True als feasible, of bij vrijstelling
+        return all([self.binnen_capaciteit, self.minima_capaciteit_behaald, self.bewoners_koken_thuis]) or self.kook_vrijstelling

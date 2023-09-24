@@ -81,3 +81,12 @@ def ingest_startoplossing(deelnemers: dict, huizen: dict, startoplossing_path: s
         for gang in ['Voor', 'Hoofd', 'Na']:
             huizen[df_startoplossing[gang][i]].gast_toevoeg(deelnemers[df_startoplossing['Bewoner'][i]].naam)
     return deelnemers, huizen
+
+def check_feasible(deelnemers: dict, huizen: dict) -> bool:
+    """
+    Checks if solution is feasible or not.
+    """
+    deelnemer_feasible = all(deelnemer.deelnemer_feasible for deelnemer in deelnemers.values())
+    huis_feasible = all(huis.huis_feasible for huis in huizen.values())
+    
+    return all([deelnemer_feasible, huis_feasible])
