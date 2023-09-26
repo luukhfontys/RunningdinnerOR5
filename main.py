@@ -14,9 +14,11 @@ deelnemers = ingest_deelnemers(file_path)
 huizen = ingest_huizen(file_path)
 
 #start oplossing invoeren bij deelnemers en huizen
-deelnemers, huizen = ingest_startoplossing(deelnemers, huizen, startoplossing_path)
+start_oplossing = ingest_startoplossing(deelnemers, huizen, startoplossing_path)
+
+# start_oplossing.update_aantalgasten()
 
 #Check of start oplossing feasible is.
-start_feasible = check_feasible(deelnemers, huizen)
+# start_feasible = check_feasible(deelnemers, huizen)
 
 y=1

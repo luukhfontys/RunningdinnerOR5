@@ -1,5 +1,5 @@
 import pandas as pd
-from Classes import Deelnemer, Huis
+from Classes import Deelnemer, Huis, Oplossing
 
 def ingest_deelnemers(file_path: str) -> dict:
 
@@ -51,6 +51,11 @@ def ingest_huizen(file_path: str) -> dict:
         max_gasten = row['Max groepsgrootte']
         gang_voorkeur = row['Voorkeur gang']
         
+        #als er geen min of max aangegeven is vervang nan met 0
+        if pd.isna(min_gasten):
+            min_gasten = 0
+            max_gasten = 0
+        
         huis = Huis(adres, min_gasten, max_gasten)
         if not pd.isna(gang_voorkeur):
             huis.gang_voorkeur = gang_voorkeur
@@ -70,17 +75,19 @@ def ingest_startoplossing(deelnemers: dict, huizen: dict, startoplossing_path: s
     df_startoplossing = pd.read_excel(startoplossing_path)
 
     #voor hoofd, nagerecht bij deelnemers in de class zetten, en voorkeursgang in huis classes opslaan
+    oplossing = Oplossing(deelnemers, huizen)
     for i in range(len(df_startoplossing)):
-        
-        deelnemers[df_startoplossing['Bewoner'][i]].voor = df_startoplossing['Voor'][i]
-        deelnemers[df_startoplossing['Bewoner'][i]].hoofd = df_startoplossing['Hoofd'][i]
-        deelnemers[df_startoplossing['Bewoner'][i]].na = df_startoplossing['Na'][i]
-        huizen[df_startoplossing['Huisadres'][i]].voorbereidde_gang = df_startoplossing['kookt'][i]
+        oplossing.oplossing[
+            df_startoplossing['Bewoner'][i]] = [df_startoplossing['kookt'][i],
+                                                df_startoplossing['Voor'][i],
+                                                df_startoplossing['Hoofd'][i],
+                                                df_startoplossing['Na'][i],
+                                                0]
         
         #Gasten per huis class gasten lijst vermelden
-        for gang in ['Voor', 'Hoofd', 'Na']:
-            huizen[df_startoplossing[gang][i]].gast_toevoeg(deelnemers[df_startoplossing['Bewoner'][i]].naam)
-    return deelnemers, huizen
+        # for gang in ['Voor', 'Hoofd', 'Na']:
+        #     huizen[df_startoplossing[gang][i]].gast_toevoeg(deelnemers[df_startoplossing['Bewoner'][i]].naam)
+    return oplossing
 
 def check_feasible(deelnemers: dict, huizen: dict) -> bool:
     """
@@ -90,3 +97,7 @@ def check_feasible(deelnemers: dict, huizen: dict) -> bool:
     huis_feasible = all(huis.huis_feasible for huis in huizen.values())
     
     return all([deelnemer_feasible, huis_feasible])
+
+def gang_wissel(deelnemer1: str, deelnemer2: str, gang:str, deelnemers: dict, huizen: dict):
+    deelnemers[deelnemer1].gang_wissel(deelnemer2, gang)
+    
