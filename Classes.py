@@ -3,12 +3,19 @@ class Oplossing:
         self.oplossing = dict() # key= 'Naam', items= [gang, voor, hoofd, na, aantalgasten]
         self.deelnemers = deelnemers
         self.huizen = huizen
+        self.gangindex = {'Voor': 1, 'Hoofd': 2, 'Na': 3}
     
+    def gang_eet_wissel(self, deelnemer1: str, deelnemer2: str, gang: str):
+        """"Deze functie wisselt 2 deelnemers van locatie voor een bepaalde gang."""
+        #gangen opslaan voor beide
+        gang1 = self.oplossing[deelnemer1][self.gangindex[gang]]
+        gang2 = self.oplossing[deelnemer2][self.gangindex[gang]]
+        
+        #gangen wisselen
+        self.oplossing[deelnemer1][self.gangindex[gang]] = gang2
+        self.oplossing[deelnemer2][self.gangindex[gang]] = gang1
+        
     def gang_kook_wissel(self, adres1: str, adres2: str):
-        gangindex = {
-            'Voor'    : 1,
-            'Hoofd'   : 2,
-            'Na'      : 3}
         bewonersadres1 = self.huizen[adres1].bewoners
         bewonersadres2 = self.huizen[adres2].bewoners
         gang1 = self.oplossing[bewonersadres1[0]][0]
@@ -19,14 +26,14 @@ class Oplossing:
         
         swap_gangen = dict()
         for bewoner in bewonersadres1:
-            swap_gangen[bewoner] = self.oplossing[swap_bewoners[bewoner]][gangindex[gang1]]
+            swap_gangen[bewoner] = self.oplossing[swap_bewoners[bewoner]][self.gangindex[gang1]]
         for bewoner in bewonersadres2:
-            swap_gangen[bewoner] = self.oplossing[swap_bewoners[bewoner]][gangindex[gang2]]
+            swap_gangen[bewoner] = self.oplossing[swap_bewoners[bewoner]][self.gangindex[gang2]]
             
         for bewoner in bewonersadres1:
-            self.oplossing[bewoner][gangindex[gang1]] = swap_gangen[bewoner]
+            self.oplossing[bewoner][self.gangindex[gang1]] = swap_gangen[bewoner]
         for bewoner in bewonersadres2:
-            self.oplossing[bewoner][gangindex[gang2]] = swap_gangen[bewoner]
+            self.oplossing[bewoner][self.gangindex[gang2]] = swap_gangen[bewoner]
         
         #Eet gang overal omwisselen:
         for bewoner, oplossinglijst in self.oplossing.items():
@@ -34,31 +41,36 @@ class Oplossing:
         
         for bewoner in bewonersadres1:
             self.oplossing[bewoner][0] = gang2
-            self.oplossing[bewoner][gangindex[gang2]] = adres1
+            self.oplossing[bewoner][self.gangindex[gang2]] = adres1
         
         for bewoner in bewonersadres2:
             self.oplossing[bewoner][0] = gang1
-            self.oplossing[bewoner][gangindex[gang1]] = adres2
+            self.oplossing[bewoner][self.gangindex[gang1]] = adres2
         
-    def create_swap_map(self, list1, list2):
-            swap_map = {}
-            #lijst 1 is 1 en list2 is 2
-            if len(list1) == 1 and len(list2) > 1:
-                for element in list2:
-                    swap_map[element] = list1[0]
-                    swap_map[list1[0]] = element
-                #lijst 2 is 1 en list2 is 1
-            elif len(list2) == 1 and len(list1) > 1:
-                for element in list1:
-                    swap_map[element] = list2[0]
-                    swap_map[list2[0]] = element
-            else:
-                #allebij even groot
-                for i in range(len(list1)):
-                    swap_map[list1[i]] = list2[i]
-                    swap_map[list2[i]] = list1[i]
+    def create_swap_map(self, list1: list, list2: list):
+        """
+        Deze functie zorgt ervoor dat 2 mensen met 1 persoon van gangen kunnen wisselen door de
+        twee personen allebei de locaties van de ene persoon te geven en het ene persoon de eerste
+        van de 2 personen zijn locatie te geven.
+        """
+        swap_map = {}
+        #lijst 1 is len(1) en list2 is len(2)
+        if len(list1) == 1 and len(list2) > 1:
+            for element in list2:
+                swap_map[element] = list1[0]
+                swap_map[list1[0]] = element
+            #lijst 2 is len(1) en list2 is len(1)
+        elif len(list2) == 1 and len(list1) > 1:
+            for element in list1:
+                swap_map[element] = list2[0]
+                swap_map[list2[0]] = element
+        else:
+            #allebij even groot
+            for i in range(len(list1)):
+                swap_map[list1[i]] = list2[i]
+                swap_map[list2[i]] = list1[i]
 
-            return swap_map
+        return swap_map
 
     @property
     def sync_attributen(self) -> bool: #Sychroniseerd bewoners die samen moeten blijven
@@ -116,7 +128,7 @@ class Oplossing:
     #Feasibility van huidige oplossing
     @property
     def feasible(self):
-        return all([self.kookt_niet_op_eigen_adres + self.not_in_capacity == 0])
+        return all([self.kookt_niet_op_eigen_adres + self.not_in_capacity[0] == 0])
     
 class Deelnemer:
     def __init__(self, naam, adres):
