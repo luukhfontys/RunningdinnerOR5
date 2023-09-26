@@ -20,5 +20,5 @@ start_oplossing = ingest_startoplossing(deelnemers, huizen, startoplossing_path)
 
 #Check of start oplossing feasible is.
 # start_feasible = check_feasible(deelnemers, huizen)
-
+start_oplossing.gang_kook_wissel('WO79', 'VW64')
 y=1
