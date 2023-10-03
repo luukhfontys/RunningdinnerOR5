@@ -4,6 +4,12 @@ class Oplossing:
         self.deelnemers = deelnemers
         self.huizen = huizen
         self.gangindex = {'Voor': 1, 'Hoofd': 2, 'Na': 3}
+        self.gewichten = {1: 1, 
+                          2: 1,
+                          3: 1,
+                          4: 1,
+                          5: 1,
+                          6: 1}
     
     def gang_eet_wissel(self, deelnemer1: str, deelnemer2: str, gang: str):
         """"Deze functie wisselt 2 deelnemers van locatie voor een bepaalde gang."""
@@ -73,6 +79,27 @@ class Oplossing:
         return swap_map
 
     @property
+    def doelfunctie(self):
+        x = 1
+        
+    @property
+    def tafelgenoot_aantal(self):
+        """Returned een dictionary met key='Deelnemer': [[Bewoners], [Aantal keer tafelgenoot per bewoner]]"""
+        tafelgenoot_aantal = dict()
+        
+        for deelnemer1 in self.oplossing:
+            tafelgenoot_aantal[deelnemer1] = [[], []]
+            for deelnemer2 in self.oplossing:
+                tafel_overlap_set = set(self.oplossing[deelnemer1][1:4]).intersection(self.oplossing[deelnemer2][1:4])
+                if (deelnemer1 != deelnemer2) and len(tafel_overlap_set) > 0:
+                    tafelgenoot_aantal[deelnemer1][0].append(deelnemer2)
+                    tafelgenoot_aantal[deelnemer1][1].append(len(tafel_overlap_set))
+    
+        return tafelgenoot_aantal
+    
+    
+    
+    @property
     def sync_attributen(self) -> bool: #Sychroniseerd bewoners die samen moeten blijven
         for deelnemer in self.oplossing:
             deelnemer1 = self.deelnemers[deelnemer]
@@ -111,17 +138,13 @@ class Oplossing:
     #check of bewoners niet koken op eigen adres (tenzij ze zijn vrijgesteld van koken)
     @property
     def kookt_niet_op_eigen_adres(self):
-        gangindex = {
-            'Voor'    : 1,
-            'Hoofd'   : 2,
-            'Na'      : 3}
         kookt_niet_count = 0
         for deelnemer in self.oplossing:
             eigenadres = self.deelnemers[deelnemer].adres
             kookgang = self.oplossing[deelnemer][0]
             vrijstelling = self.huizen[eigenadres].kook_vrijstelling
             if not vrijstelling:
-                if eigenadres != self.oplossing[deelnemer][gangindex[kookgang]]:
+                if eigenadres != self.oplossing[deelnemer][self.gangindex[kookgang]]:
                     kookt_niet_count += 1
         return kookt_niet_count
     

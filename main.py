@@ -20,13 +20,8 @@ start_oplossing = ingest_startoplossing(deelnemers, huizen, startoplossing_path)
 
 #Check of start oplossing feasible is.
 # start_feasible = check_feasible(deelnemers, huizen)
-# start_oplossing.gang_kook_wissel('WO79', 'VW35')
+start_oplossing.gang_kook_wissel('WO_79', 'VW_35')
 
-# start_oplossing.gang_eet_wissel('WO_59_V_Els', 'WO_32_V_Ing', 'Hoofd')
-        # re-count value
+start_oplossing.gang_eet_wissel('WO_45_M_Die', 'WO_53_M_Ola', 'Voor')
 
-# for deelnemer in start_oplossing.oplossing:
-#     for key, lijst in start_oplossing.oplossing.items():
-#             start_oplossing.oplossing[deelnemer][4] += lijst.count(start_oplossing.deelnemers[deelnemer].adres)
-start_oplossing.update_aantalgasten()
 y=1
