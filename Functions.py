@@ -6,7 +6,7 @@ def ingest_deelnemers(file_path: str) -> dict:
     ## Deelnemer input waardes
 
     #Alle deelnemers in een dataframe zetten
-    df_deelnemers = pd.read_excel('Running Dinner dataset 2022.xlsx', sheet_name = 'Bewoners')
+    df_deelnemers = pd.read_excel(file_path, sheet_name = 'Bewoners')
 
     deelnemers = dict()
 
@@ -18,7 +18,7 @@ def ingest_deelnemers(file_path: str) -> dict:
         deelnemers[deelnemer.naam] = deelnemer
 
     #Sla op wie er bij elkaar moet blijven
-    df_bijelkaar = pd.read_excel('Running Dinner dataset 2022.xlsx', sheet_name = 'Paar blijft bij elkaar', skiprows=[0])
+    df_bijelkaar = pd.read_excel(file_path, sheet_name = 'Paar blijft bij elkaar', skiprows=[0])
 
     for index, row in df_bijelkaar.iterrows():
         bewoner1 = deelnemers.get(row["Bewoner1"])
@@ -28,7 +28,7 @@ def ingest_deelnemers(file_path: str) -> dict:
         bewoner2.bijelkaarblijven = bewoner1
 
     #Alle directe buren opslaan per deelnemer
-    df_directe_buren = pd.read_excel('Running Dinner dataset 2022.xlsx', sheet_name = 'Buren', skiprows=[0])
+    df_directe_buren = pd.read_excel(file_path, sheet_name = 'Buren', skiprows=[0])
     for i in range(len(df_directe_buren)):
         deelnemers[df_directe_buren.iloc[i, 0]].buren.append(deelnemers[df_directe_buren.iloc[i, 1]].naam)
     
@@ -39,7 +39,7 @@ def ingest_huizen(file_path: str) -> dict:
     
     #Input waardes voor huizen en deelnemers
     df_huizen = pd.read_excel(file_path, sheet_name = 'Adressen')
-    df_deelnemers = pd.read_excel('Running Dinner dataset 2022.xlsx', sheet_name = 'Bewoners')
+    df_deelnemers = pd.read_excel(file_path, sheet_name = 'Bewoners')
     # df_huizen.dropna(subset= 'Min groepsgrootte',inplace=True)
     # df_huizen.reset_index(inplace=True,drop=True)
 
