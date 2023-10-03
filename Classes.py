@@ -80,7 +80,7 @@ class Oplossing:
             if deelnemer2 is not None:
                 self.oplossing[deelnemer2.naam][:4] = self.oplossing[deelnemer1.naam][:4]
     
-    # @property
+    @property
     def update_aantalgasten(self):
         #reset value
         for deelnemer in self.oplossing:
