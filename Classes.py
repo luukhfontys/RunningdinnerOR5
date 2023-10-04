@@ -124,6 +124,8 @@ class Oplossing:
                 Score_wens3 += 1
                 huizen_voorkeur_gegeven_lijst.append(huis)
         return Score_wens3, huizen_voorkeur_gegeven_lijst
+    
+    
     ## Overig
     @property
     def sync_attributen(self) -> bool: #Sychroniseerd bewoners die samen moeten blijven
