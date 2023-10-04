@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import math as m
 import pandas as pd
 from Classes import Deelnemer, Huis
-from Functions import ingest_deelnemers, ingest_huizen, ingest_startoplossing, check_feasible
+from Functions import ingest_deelnemers, ingest_huizen, ingest_startoplossing
 
 file_path = 'Running Dinner dataset 2023 v2.xlsx'
 startoplossing_path = 'Running Dinner eerste oplossing 2023 v2.xlsx'
@@ -20,8 +20,8 @@ start_oplossing = ingest_startoplossing(deelnemers, huizen, startoplossing_path)
 
 #Check of start oplossing feasible is.
 # start_feasible = check_feasible(deelnemers, huizen)
-start_oplossing.gang_kook_wissel('WO_79', 'VW_35')
+# start_oplossing.gang_kook_wissel('WO_79', 'VW_35')
 
-start_oplossing.gang_eet_wissel('WO_45_M_Die', 'WO_53_M_Ola', 'Voor')
+# start_oplossing.gang_eet_wissel('WO_45_M_Die', 'WO_53_M_Ola', 'Voor')
 
 y=1

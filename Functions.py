@@ -40,6 +40,7 @@ def ingest_huizen(file_path: str) -> dict:
     #Input waardes voor huizen en deelnemers
     df_huizen = pd.read_excel(file_path, sheet_name = 'Adressen')
     df_deelnemers = pd.read_excel(file_path, sheet_name = 'Bewoners')
+    df_kookte_vorig_jaar = pd.read_excel(file_path, sheet_name = 'Kookte vorig jaar', skiprows=[0])
     # df_huizen.dropna(subset= 'Min groepsgrootte',inplace=True)
     # df_huizen.reset_index(inplace=True,drop=True)
 
@@ -67,6 +68,11 @@ def ingest_huizen(file_path: str) -> dict:
         
         if row['Kookt niet'] == 1:
             huizen[row['Huisadres']].kook_vrijstelling = True
+    
+    #alle gekookte gangen vorig jaar registreren bij behorende huisadres
+    for index, row in df_kookte_vorig_jaar.iterrows():
+        huizen[row['Huisadres']].kookte_vorigjaar = row['Gang']
+    
     return huizen
 
 def ingest_startoplossing(deelnemers: dict, huizen: dict, startoplossing_path: str) -> tuple[dict, dict]:
@@ -88,16 +94,3 @@ def ingest_startoplossing(deelnemers: dict, huizen: dict, startoplossing_path: s
         # for gang in ['Voor', 'Hoofd', 'Na']:
         #     huizen[df_startoplossing[gang][i]].gast_toevoeg(deelnemers[df_startoplossing['Bewoner'][i]].naam)
     return oplossing
-
-def check_feasible(deelnemers: dict, huizen: dict) -> bool:
-    """
-    Checks if solution is feasible or not.
-    """
-    deelnemer_feasible = all(deelnemer.deelnemer_feasible for deelnemer in deelnemers.values())
-    huis_feasible = all(huis.huis_feasible for huis in huizen.values())
-    
-    return all([deelnemer_feasible, huis_feasible])
-
-def gang_wissel(deelnemer1: str, deelnemer2: str, gang:str, deelnemers: dict, huizen: dict):
-    deelnemers[deelnemer1].gang_wissel(deelnemer2, gang)
-    

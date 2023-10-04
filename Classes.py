@@ -1,3 +1,5 @@
+import numpy as np
+
 class Oplossing:
     def __init__(self, deelnemers: dict, huizen: dict):
         self.oplossing = dict() # key= 'Naam', items= [gang, voor, hoofd, na, aantalgasten]
@@ -52,7 +54,96 @@ class Oplossing:
         for bewoner in bewonersadres2:
             self.oplossing[bewoner][0] = gang1
             self.oplossing[bewoner][self.gangindex[gang1]] = adres2
+    
+    
+    ## Doel functie berekeningen
+    @property
+    def doelfunctie(self): #Maximalisatie is het doeleind
+        return self.wens1 + self.wens2
+    
+    # Wens 1:
+    @property
+    def wens1(self):
+        return self.gewichten[1] * self.wens1_berekening[0] # <-inf, 0] range
+    
+    @property
+    def wens2(self):
+        return self.gewichten[2] * self.wens2_berekening[0] # <-inf, 0] range
+    
+    @property
+    def wens2(self):
+        return self.gewichten[3] * self.wens3_berekening[0]
+    
+    # Berekenen wie er allemaal met elkaar eet en hoevaak. Daarnaast wordt er de doelwaarde van wens1 berekend
+    @property
+    def tafelgenoot_frequentie_lijst(self):
+        return self.wens1_berekening[1]
+    
+    @property
+    def wens1_berekening(self):
+        """Returned een dictionary met key='Deelnemer': [[Bewoners], [Aantal keer tafelgenoot per bewoner]]"""
+        tafelgenoot_aantal = dict()
         
+        Score_wens_1 = 0
+        for deelnemer1 in self.oplossing:
+            tafelgenoot_aantal[deelnemer1] = [[], []]
+            for deelnemer2 in self.oplossing:
+                tafel_overlap_set = set(self.oplossing[deelnemer1][1:4]).intersection(self.oplossing[deelnemer2][1:4])
+                if (deelnemer1 != deelnemer2) and len(tafel_overlap_set) > 0:
+                    tafelgenoot_aantal[deelnemer1][0].append(deelnemer2)
+                    tafelgenoot_aantal[deelnemer1][1].append(len(tafel_overlap_set))
+                    Score_wens_1 -= len(tafel_overlap_set) - 1
+    
+        return Score_wens_1, tafelgenoot_aantal
+    
+    @property
+    def wens2_berekening(self):
+        """Returnt: (doel score wens 2, aantal keer waar wens2 wordt beschadigd, huizen waarbij dit gebeurt)"""
+        Score_wens2 = 0
+        huizen_hoofd_seq = []
+        for huis in self.huizen:
+            #verkrijg huidige kook gang
+            huidige_kook_gang = self.oplossing[self.huizen[huis].bewoners[0]][0]
+            if (self.huizen[huis].kookte_vorigjaar == 'Hoofd') and (huidige_kook_gang == 'Hoofd'):
+                Score_wens2 -= 1
+                huizen_hoofd_seq.append(huis)
+        
+        #Aantal huizen registreren waarbij hoofd gerecht 2 keer wordt gedaan achter elkaar
+        num_hoofd_seq = abs(Score_wens2)
+        return Score_wens2, num_hoofd_seq, huizen_hoofd_seq
+    
+    @property
+    def wens3_berekening(self):
+        Score_wens3 = 0
+        #Huizen bijhouden waar voorkeur is toegekent
+        huizen_voorkeur_gegeven_lijst = []
+        for huis in self.huizen:
+            Voorkeur_gang = self.huizen[huis].gang_voorkeur
+            huidige_kook_gang = self.oplossing[self.huizen[huis].bewoners[0]][0]
+            if (Voorkeur_gang != None) and (Voorkeur_gang == huidige_kook_gang):
+                Score_wens3 += 1
+                huizen_voorkeur_gegeven_lijst.append(huis)
+        return Score_wens3, huizen_voorkeur_gegeven_lijst
+    ## Overig
+    @property
+    def sync_attributen(self) -> bool: #Sychroniseerd bewoners die samen moeten blijven
+        for deelnemer in self.oplossing:
+            deelnemer1 = self.deelnemers[deelnemer]
+            deelnemer2 = self.deelnemers[deelnemer].bijelkaarblijven
+            if deelnemer2 is not None:
+                self.oplossing[deelnemer2.naam][:4] = self.oplossing[deelnemer1.naam][:4]
+    
+    @property
+    def update_aantalgasten(self):
+        #reset value
+        for deelnemer in self.oplossing:
+            self.oplossing[deelnemer][4] = 0
+        
+        # re-count value
+        for deelnemer in self.oplossing:
+            for key, lijst in self.oplossing.items():
+                self.oplossing[deelnemer][4] += lijst.count(self.deelnemers[deelnemer].adres)
+    
     def create_swap_map(self, list1: list, list2: list):
         """
         Deze functie zorgt ervoor dat 2 mensen met 1 persoon van gangen kunnen wisselen door de
@@ -77,48 +168,8 @@ class Oplossing:
                 swap_map[list2[i]] = list1[i]
 
         return swap_map
-
-    @property
-    def doelfunctie(self):
-        x = 1
-        
-    @property
-    def tafelgenoot_aantal(self):
-        """Returned een dictionary met key='Deelnemer': [[Bewoners], [Aantal keer tafelgenoot per bewoner]]"""
-        tafelgenoot_aantal = dict()
-        
-        for deelnemer1 in self.oplossing:
-            tafelgenoot_aantal[deelnemer1] = [[], []]
-            for deelnemer2 in self.oplossing:
-                tafel_overlap_set = set(self.oplossing[deelnemer1][1:4]).intersection(self.oplossing[deelnemer2][1:4])
-                if (deelnemer1 != deelnemer2) and len(tafel_overlap_set) > 0:
-                    tafelgenoot_aantal[deelnemer1][0].append(deelnemer2)
-                    tafelgenoot_aantal[deelnemer1][1].append(len(tafel_overlap_set))
     
-        return tafelgenoot_aantal
-    
-    
-    
-    @property
-    def sync_attributen(self) -> bool: #Sychroniseerd bewoners die samen moeten blijven
-        for deelnemer in self.oplossing:
-            deelnemer1 = self.deelnemers[deelnemer]
-            deelnemer2 = self.deelnemers[deelnemer].bijelkaarblijven
-            if deelnemer2 is not None:
-                self.oplossing[deelnemer2.naam][:4] = self.oplossing[deelnemer1.naam][:4]
-    
-    @property
-    def update_aantalgasten(self):
-        #reset value
-        for deelnemer in self.oplossing:
-            self.oplossing[deelnemer][4] = 0
-        
-        # re-count value
-        for deelnemer in self.oplossing:
-            for key, lijst in self.oplossing.items():
-                self.oplossing[deelnemer][4] += lijst.count(self.deelnemers[deelnemer].adres)
-    
-    #Check how many are in capacity
+    ##Feasibility checken
     @property
     def not_in_capacity(self) -> int:
         not_in_capacity_count = 0
@@ -204,12 +255,13 @@ class Huis:
         self.voorbereidde_gang = None
         self.bewoners = []
         self.kook_vrijstelling = False
+        self.kookte_vorigjaar = None
         
-    def gast_toevoeg(self, gast: str):
-        self.gasten.append(gast)
+    # def gast_toevoeg(self, gast: str):
+    #     self.gasten.append(gast)
         
-    def gast_verwijder(self, gast: str):
-        self.gasten.pop(gast)
+    # def gast_verwijder(self, gast: str):
+    #     self.gasten.pop(gast)
         
     # @property #Aantal gasten bijhouden
     # def aantalgasten(self) -> int:
