@@ -26,6 +26,11 @@ class Oplossing:
         self.Score_wens4 = 0
         self.tafelgenoot_vorigjaar_en_dit_jaar = dict()
         
+        self.Score_wens5 = 0
+        
+        self.Score_wens6 = 0
+        self.tafelgenoot_vorigjaar_en_2_jaar_geleden = dict()
+        
     def gang_eet_wissel(self, deelnemer1: str, deelnemer2: str, gang: str):
         """"Deze functie wisselt 2 deelnemers van locatie voor een bepaalde gang."""
         #gangen opslaan voor beide
@@ -72,7 +77,7 @@ class Oplossing:
     ## Doel functie berekeningen
     @property
     def doelfunctie(self): #Maximalisatie is het doeleind
-        return self.wens1 + self.wens2 + self.wens3
+        return self.wens1 + self.wens2 + self.wens3 + self.wens4 + self.wens5 + self.wens6
     
     # Wens 1:
     @property
@@ -91,12 +96,23 @@ class Oplossing:
     def wens4(self):
         return self.gewichten[4] * self.Score_wens4
     
-    # Berekenen wie er allemaal met elkaar eet en hoevaak. Daarnaast wordt er de doelwaarde van wens1 berekend
-    # @property
-    # def tafelgenoot_frequentie_lijst(self):
-    #     return self.wens1_berekening[1]
+    @property
+    def wens5(self):
+        return self.gewichten[5] * self.Score_wens5
     
-    # @property
+    @property
+    def wens6(self):
+        return self.gewichten[6] * self.Score_wens6
+    
+    #Om alle wensen uit te rekenen
+    def Bereken_alle_wensen(self):
+        self.wens1_berekening()
+        self.wens2_berekening()
+        self.wens3_berekening()
+        self.wens4_berekening()
+        self.wens5_berekening()
+        self.wens6_berekening()
+    
     def wens1_berekening(self): #Twee verschillende deelnemers zijn zo weinig mogelijk keer elkaars tafelgenoten; het liefstmaximaal één keer. Dit geldt zeker voor deelnemers uit hetzelfde huishouden.
         """Returned een dictionary met key='Deelnemer': [[Bewoners], [Aantal keer tafelgenoot per bewoner]]"""
         self.tafelgenoot_aantal = dict()
@@ -154,6 +170,31 @@ class Oplossing:
         
         return self.Score_wens4, self.tafelgenoot_vorigjaar_en_dit_jaar
 
+    def wens5_berekening(self):  
+        self.Score_wens5 = 0
+        for deelnemer in self.oplossing:
+            tafelgenoten = self.tafelgenoot_aantal[deelnemer][0]
+            buren = self.deelnemers[deelnemer].buren
+            tafel_overlap_set = set(tafelgenoten).intersection(buren)
+            if len(tafel_overlap_set) > 0:
+                
+                self.Score_wens5 -= len(tafel_overlap_set)
+                
+        return self.Score_wens5
+        
+        
+    def wens6_berekening(self):
+        self.Score_wens6 = 0
+        self.tafelgenoot_vorigjaar_en_2_jaar_geleden = dict()
+        for deelnemer in self.oplossing:
+            tafelgenootlijst_ditjaar = self.tafelgenoot_aantal[deelnemer][0]
+            tafelgenootlijst_vorigjaar = self.deelnemers[deelnemer].tafelgenoten2jaargeleden
+            if tafelgenootlijst_vorigjaar != []:
+                intersect_lijst = set(tafelgenootlijst_ditjaar).intersection(tafelgenootlijst_vorigjaar)
+                self.tafelgenoot_vorigjaar_en_2_jaar_geleden[deelnemer] = intersect_lijst
+                self.Score_wens6 -= len(intersect_lijst)
+    
+        return self.Score_wens6, self.tafelgenoot_vorigjaar_en_2_jaar_geleden
 
     ## Overig
     @property

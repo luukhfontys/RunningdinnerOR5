@@ -29,10 +29,8 @@ start_oplossing = ingest_startoplossing(deelnemers, huizen, startoplossing_path)
 # start_oplossing.gang_eet_wissel('WO_45_M_Die', 'WO_53_M_Ola', 'Voor')
 
 start = time.time()
-start_oplossing.wens1_berekening()
-start_oplossing.wens2_berekening()
-start_oplossing.wens3_berekening()
-start_oplossing.wens4_berekening()
+start_oplossing.Bereken_alle_wensen()
+
 eind = time.time()
 
 print(eind-start)
