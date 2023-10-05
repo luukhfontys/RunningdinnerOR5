@@ -59,7 +59,7 @@ class Oplossing:
     ## Doel functie berekeningen
     @property
     def doelfunctie(self): #Maximalisatie is het doeleind
-        return self.wens1 + self.wens2
+        return self.wens1 + self.wens2 + self.wens3
     
     # Wens 1:
     @property
@@ -71,7 +71,7 @@ class Oplossing:
         return self.gewichten[2] * self.wens2_berekening[0] # <-inf, 0] range
     
     @property
-    def wens2(self):
+    def wens3(self):
         return self.gewichten[3] * self.wens3_berekening[0]
     
     # Berekenen wie er allemaal met elkaar eet en hoevaak. Daarnaast wordt er de doelwaarde van wens1 berekend
@@ -124,6 +124,11 @@ class Oplossing:
                 Score_wens3 += 1
                 huizen_voorkeur_gegeven_lijst.append(huis)
         return Score_wens3, huizen_voorkeur_gegeven_lijst
+    
+    @property 
+    def wens4_berekening(self):
+        Score_wens4 = 0
+
     
     
     ## Overig
@@ -212,6 +217,7 @@ class Deelnemer:
         self.adres = adres
         self.bijelkaarblijven = None
         self.buren = []
+        self.tafelgenootvorigjaar = []
     
     def gang_wissel(self, other, gang): #Wissel gang tussen twee personen
         setattr(self, gang, getattr(other, gang))

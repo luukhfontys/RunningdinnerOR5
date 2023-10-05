@@ -32,6 +32,12 @@ def ingest_deelnemers(file_path: str) -> dict:
     for i in range(len(df_directe_buren)):
         deelnemers[df_directe_buren.iloc[i, 0]].buren.append(deelnemers[df_directe_buren.iloc[i, 1]].naam)
     
+    #Alle tafelgenoten van vorigjaar inladen
+    df_tafelgenoten_vorigjaar = pd.read_excel(file_path, sheet_name = 'Tafelgenoot vorig jaar', skiprows=[0])
+    for i in range(len(df_tafelgenoten_vorigjaar)):
+        huidige_bewoner = df_tafelgenoten_vorigjaar['Bewoner1'][i]
+        deelnemers[huidige_bewoner].tafelgenootvorigjaar.append(df_tafelgenoten_vorigjaar['Bewoner2'][i])
+
     return deelnemers
 
 def ingest_huizen(file_path: str) -> dict:
