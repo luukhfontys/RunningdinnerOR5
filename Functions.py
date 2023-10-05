@@ -40,6 +40,13 @@ def ingest_deelnemers(file_path: str) -> dict:
 
     return deelnemers
 
+def ingest_tafelgenoten_2_jaar_geleden(file_path: str, deelnemers: dict()) -> dict:
+    df_tafel_genoten_2_jaar_geleden = pd.read_excel(file_path, sheet_name = 'Tafelgenoot vorig jaar', skiprows=[0])
+    for i in range(len(df_tafel_genoten_2_jaar_geleden)):
+        huidige_bewoner = df_tafel_genoten_2_jaar_geleden['Bewoner1'][i]
+        if deelnemers.get(huidige_bewoner) is not None:
+            deelnemers[huidige_bewoner].tafelgenoten2jaargeleden.append(df_tafel_genoten_2_jaar_geleden['Bewoner2'][i])
+    return deelnemers
 def ingest_huizen(file_path: str) -> dict:
     """Neemt de file path van xlsx en stopt alles in een dictionary van objecten"""
     

@@ -3,13 +3,16 @@ import matplotlib.pyplot as plt
 import math as m
 import pandas as pd
 from Classes import Deelnemer, Huis
-from Functions import ingest_deelnemers, ingest_huizen, ingest_startoplossing
+from Functions import ingest_deelnemers, ingest_huizen, ingest_startoplossing, ingest_tafelgenoten_2_jaar_geleden
 
 file_path = 'Running Dinner dataset 2023 v2.xlsx'
+file_path_vorigjaar = 'Running Dinner dataset 2022.xlsx'
 startoplossing_path = 'Running Dinner eerste oplossing 2023 v2.xlsx'
 
 #deelnemers in dictionary zetten
 deelnemers = ingest_deelnemers(file_path)
+#Data 2 jaar geleden laden
+deelnemers = ingest_tafelgenoten_2_jaar_geleden(file_path_vorigjaar, deelnemers)
 #Huizen in dictionary zetten
 huizen = ingest_huizen(file_path)
 
