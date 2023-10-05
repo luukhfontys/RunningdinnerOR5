@@ -59,7 +59,7 @@ class Oplossing:
     ## Doel functie berekeningen
     @property
     def doelfunctie(self): #Maximalisatie is het doeleind
-        return self.wens1 + self.wens2 + self.wens3 + self.wens4
+        return self.wens1 + self.wens2 + self.wens3
     
     # Wens 1:
     @property
@@ -74,9 +74,9 @@ class Oplossing:
     def wens3(self):
         return self.gewichten[3] * self.wens3_berekening[0]
 
-    @property
-    def wens4(self):
-        return self.gewichten[4] * self.wens4_berekening[0]
+    # @property
+    # def wens4(self):
+    #     return self.gewichten[4] * self.wens4_berekening[0]
     
     # Berekenen wie er allemaal met elkaar eet en hoevaak. Daarnaast wordt er de doelwaarde van wens1 berekend
     @property
@@ -132,11 +132,17 @@ class Oplossing:
     @property 
     def wens4_berekening(self):
         Score_wens4 = 0
-        
+        tafelgenoot_vorigjaar_en_dit_jaar = dict() 
         for deelnemer in self.deelnemers:
             tafelgenootlijst_ditjaar = self.tafelgenoot_frequentie_lijst[deelnemer][0]
             tafelgenootlijst_vorigjaar = self.deelnemers[deelnemer].tafelgenootvorigjaar
-            frequentie = len(set(tafelgenootlijst_ditjaar).intersection(tafelgenootlijst_vorigjaar))
+            intersect_lijst = list(set(tafelgenootlijst_ditjaar).intersection(tafelgenootlijst_vorigjaar))
+            tafelgenoot_vorigjaar_en_dit_jaar[deelnemer] = intersect_lijst
+            Score_wens4 -= len(intersect_lijst)
+        
+        return Score_wens4, tafelgenoot_vorigjaar_en_dit_jaar
+            
+            
             
 
 
