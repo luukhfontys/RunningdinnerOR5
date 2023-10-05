@@ -1,4 +1,5 @@
 import numpy as np
+import pdb
 
 class Oplossing:
     def __init__(self, deelnemers: dict, huizen: dict):
@@ -12,7 +13,19 @@ class Oplossing:
                           4: 1,
                           5: 1,
                           6: 1}
-    
+        self.Score_wens1 = 0
+        self.tafelgenoot_aantal = dict()
+        
+        self.Score_wens2 = 0
+        self.num_hoofd_seq = 0
+        self.huizen_hoofd_seq = []
+        
+        self.Score_wens3 = 0
+        self.huizen_voorkeur_gegeven_lijst = []
+        
+        self.Score_wens4 = 0
+        self.tafelgenoot_vorigjaar_en_dit_jaar = dict()
+        
     def gang_eet_wissel(self, deelnemer1: str, deelnemer2: str, gang: str):
         """"Deze functie wisselt 2 deelnemers van locatie voor een bepaalde gang."""
         #gangen opslaan voor beide
@@ -64,90 +77,84 @@ class Oplossing:
     # Wens 1:
     @property
     def wens1(self):
-        return self.gewichten[1] * self.wens1_berekening[0] # <-inf, 0] range
+        return self.gewichten[1] * self.Score_wens1 # <-inf, 0] range
     
     @property
     def wens2(self):
-        return self.gewichten[2] * self.wens2_berekening[0] # <-inf, 0] range
+        return self.gewichten[2] * self.Score_wens2 # <-inf, 0] range
     
     @property
     def wens3(self):
-        return self.gewichten[3] * self.wens3_berekening[0]
+        return self.gewichten[3] * self.Score_wens3
 
-    # @property
-    # def wens4(self):
-    #     return self.gewichten[4] * self.wens4_berekening[0]
+    @property
+    def wens4(self):
+        return self.gewichten[4] * self.Score_wens4
     
     # Berekenen wie er allemaal met elkaar eet en hoevaak. Daarnaast wordt er de doelwaarde van wens1 berekend
-    @property
-    def tafelgenoot_frequentie_lijst(self):
-        return self.wens1_berekening[1]
+    # @property
+    # def tafelgenoot_frequentie_lijst(self):
+    #     return self.wens1_berekening[1]
     
-    @property
-    def wens1_berekening(self):
+    # @property
+    def wens1_berekening(self): #Twee verschillende deelnemers zijn zo weinig mogelijk keer elkaars tafelgenoten; het liefstmaximaal één keer. Dit geldt zeker voor deelnemers uit hetzelfde huishouden.
         """Returned een dictionary met key='Deelnemer': [[Bewoners], [Aantal keer tafelgenoot per bewoner]]"""
-        tafelgenoot_aantal = dict()
+        self.tafelgenoot_aantal = dict()
         
-        Score_wens_1 = 0
+        self.Score_wens1 = 0
         for deelnemer1 in self.oplossing:
-            tafelgenoot_aantal[deelnemer1] = [[], []]
+            self.tafelgenoot_aantal[deelnemer1] = [[], []]
             for deelnemer2 in self.oplossing:
                 tafel_overlap_set = set(self.oplossing[deelnemer1][1:4]).intersection(self.oplossing[deelnemer2][1:4])
                 if (deelnemer1 != deelnemer2) and len(tafel_overlap_set) > 0:
-                    tafelgenoot_aantal[deelnemer1][0].append(deelnemer2)
-                    tafelgenoot_aantal[deelnemer1][1].append(len(tafel_overlap_set))
-                    Score_wens_1 -= len(tafel_overlap_set) - 1
+                    self.tafelgenoot_aantal[deelnemer1][0].append(deelnemer2)
+                    self.tafelgenoot_aantal[deelnemer1][1].append(len(tafel_overlap_set))
+                    self.Score_wens1 -= len(tafel_overlap_set) - 1
     
-        return Score_wens_1, tafelgenoot_aantal
+        return self.Score_wens1, self.tafelgenoot_aantal
     
-    @property
-    def wens2_berekening(self):
+    def wens2_berekening(self): #Een huishouden dat in 2022 een hoofdgerecht bereid heeft, bereidt tijdens de komende Running Dinner geen hoofdgerecht.
         """Returnt: (doel score wens 2, aantal keer waar wens2 wordt beschadigd, huizen waarbij dit gebeurt)"""
-        Score_wens2 = 0
-        huizen_hoofd_seq = []
+        self.huizen_hoofd_seq = []
+        self.num_hoofd_seq = 0
+        self.Score_wens2 = 0
         for huis in self.huizen:
             #verkrijg huidige kook gang
             huidige_kook_gang = self.oplossing[self.huizen[huis].bewoners[0]][0]
             if (self.huizen[huis].kookte_vorigjaar == 'Hoofd') and (huidige_kook_gang == 'Hoofd'):
-                Score_wens2 -= 1
-                huizen_hoofd_seq.append(huis)
+                self.Score_wens2 -= 1
+                self.huizen_hoofd_seq.append(huis)
         
         #Aantal huizen registreren waarbij hoofd gerecht 2 keer wordt gedaan achter elkaar
-        num_hoofd_seq = abs(Score_wens2)
-        return Score_wens2, num_hoofd_seq, huizen_hoofd_seq
+        self.num_hoofd_seq = abs(self.Score_wens2)
+        return self.Score_wens2, self.num_hoofd_seq, self.huizen_hoofd_seq
     
-    @property
     def wens3_berekening(self):
-        Score_wens3 = 0
+        self.Score_wens3 = 0
         #Huizen bijhouden waar voorkeur is toegekent
-        huizen_voorkeur_gegeven_lijst = []
+        self.huizen_voorkeur_gegeven_lijst = []
         for huis in self.huizen:
             Voorkeur_gang = self.huizen[huis].gang_voorkeur
             huidige_kook_gang = self.oplossing[self.huizen[huis].bewoners[0]][0]
             if (Voorkeur_gang != None) and (Voorkeur_gang == huidige_kook_gang):
-                Score_wens3 += 1
-                huizen_voorkeur_gegeven_lijst.append(huis)
-        return Score_wens3, huizen_voorkeur_gegeven_lijst
+                self.Score_wens3 += 1
+                self.huizen_voorkeur_gegeven_lijst.append(huis)
+        return self.Score_wens3, self.huizen_voorkeur_gegeven_lijst
     
-    @property 
     def wens4_berekening(self):
-        Score_wens4 = 0
-        tafelgenoot_vorigjaar_en_dit_jaar = dict() 
-        for deelnemer in self.deelnemers:
-            tafelgenootlijst_ditjaar = self.tafelgenoot_frequentie_lijst[deelnemer][0]
+        self.Score_wens4 = 0
+        self.tafelgenoot_vorigjaar_en_dit_jaar = dict()
+        for deelnemer in self.oplossing:
+            tafelgenootlijst_ditjaar = self.tafelgenoot_aantal[deelnemer][0]
             tafelgenootlijst_vorigjaar = self.deelnemers[deelnemer].tafelgenootvorigjaar
-            intersect_lijst = list(set(tafelgenootlijst_ditjaar).intersection(tafelgenootlijst_vorigjaar))
-            tafelgenoot_vorigjaar_en_dit_jaar[deelnemer] = intersect_lijst
-            Score_wens4 -= len(intersect_lijst)
+            if tafelgenootlijst_vorigjaar != []:
+                intersect_lijst = set(tafelgenootlijst_ditjaar).intersection(tafelgenootlijst_vorigjaar)
+                self.tafelgenoot_vorigjaar_en_dit_jaar[deelnemer] = intersect_lijst
+                self.Score_wens4 -= len(intersect_lijst)
         
-        return Score_wens4, tafelgenoot_vorigjaar_en_dit_jaar
-            
-            
-            
+        return self.Score_wens4, self.tafelgenoot_vorigjaar_en_dit_jaar
 
 
-    
-    
     ## Overig
     @property
     def sync_attributen(self) -> bool: #Sychroniseerd bewoners die samen moeten blijven
@@ -237,6 +244,12 @@ class Deelnemer:
         self.tafelgenootvorigjaar = []
         self.tafelgenoten2jaargeleden = []
     
+    def convert_lists_to_sets(self):
+        # Convert the lists to sets
+        self.buren = set(self.buren)
+        self.tafelgenootvorigjaar = set(self.tafelgenootvorigjaar)
+        self.tafelgenoten2jaargeleden = set(self.tafelgenoten2jaargeleden)
+        
     def gang_wissel(self, other, gang): #Wissel gang tussen twee personen
         setattr(self, gang, getattr(other, gang))
         setattr(other, gang, getattr(self, gang))

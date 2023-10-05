@@ -38,6 +38,7 @@ def ingest_deelnemers(file_path: str) -> dict:
         huidige_bewoner = df_tafelgenoten_vorigjaar['Bewoner1'][i]
         deelnemers[huidige_bewoner].tafelgenootvorigjaar.append(df_tafelgenoten_vorigjaar['Bewoner2'][i])
 
+    #Alles naar set converten
     return deelnemers
 
 def ingest_tafelgenoten_2_jaar_geleden(file_path: str, deelnemers: dict()) -> dict:
