@@ -36,7 +36,8 @@ def ingest_deelnemers(file_path: str) -> dict:
     df_tafelgenoten_vorigjaar = pd.read_excel(file_path, sheet_name = 'Tafelgenoot vorig jaar', skiprows=[0])
     for i in range(len(df_tafelgenoten_vorigjaar)):
         huidige_bewoner = df_tafelgenoten_vorigjaar['Bewoner1'][i]
-        deelnemers[huidige_bewoner].tafelgenootvorigjaar.append(df_tafelgenoten_vorigjaar['Bewoner2'][i])
+        if deelnemers.get(huidige_bewoner) is not None:
+            deelnemers[huidige_bewoner].tafelgenootvorigjaar.append(df_tafelgenoten_vorigjaar['Bewoner2'][i])
 
     #Alles naar set converten
     return deelnemers
@@ -85,7 +86,8 @@ def ingest_huizen(file_path: str) -> dict:
     
     #alle gekookte gangen vorig jaar registreren bij behorende huisadres
     for index, row in df_kookte_vorig_jaar.iterrows():
-        huizen[row['Huisadres']].kookte_vorigjaar = row['Gang']
+        if huizen.get(row['Huisadres']) is not None:
+            huizen[row['Huisadres']].kookte_vorigjaar = row['Gang']
     
     return huizen
 

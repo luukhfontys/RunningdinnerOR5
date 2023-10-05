@@ -7,11 +7,11 @@ class Oplossing:
         self.deelnemers = deelnemers
         self.huizen = huizen
         self.gangindex = {'Voor': 1, 'Hoofd': 2, 'Na': 3}
-        self.gewichten = {1: 1, 
-                          2: 1,
-                          3: 1,
-                          4: 1,
-                          5: 1,
+        self.gewichten = {1: 6, 
+                          2: 5,
+                          3: 4,
+                          4: 3,
+                          5: 2,
                           6: 1}
         self.Score_wens1 = 0
         self.tafelgenoot_aantal = dict()
@@ -272,8 +272,12 @@ class Oplossing:
         return kookt_niet_count
     
     #Feasibility van huidige oplossing
-    @property
+    
     def feasible(self):
+        #access property om aantal gasten te updaten
+        self.update_aantalgasten
+        self.kookt_niet_op_eigen_adres
+        self.not_in_capacity
         return all([self.kookt_niet_op_eigen_adres + self.not_in_capacity[0] == 0])
     
 class Deelnemer:
