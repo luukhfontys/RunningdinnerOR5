@@ -178,11 +178,14 @@ def eet_gang_optimizer(oplossing: object, unieke_deelnemer_combinaties: list, ga
             scorehuidig, _ = bereken_doelfunctie(oplossing)
             if (scorenieuw > scorehuidig) and feasible:
                 logger.debug(msg=f"*eet_gang_optimizer* Bij iteratie: {i}, Nieuwe oplossing score van: {scorenieuw} > {scorehuidig}, {unieke_deelnemer_combinaties[i][0]} en {unieke_deelnemer_combinaties[i][1]} zijn hiervoor gewisselt.")
+                print(f"*eet_gang_optimizer* Bij iteratie: {i}, Nieuwe oplossing score van: {scorenieuw} > {scorehuidig}, {unieke_deelnemer_combinaties[i][0]} en {unieke_deelnemer_combinaties[i][1]} zijn hiervoor gewisselt.")
                 improved = True
                 return nieuwe_oplossing, improved
         i += 1
         huidige_tijd = time.time()
         rekentijd = huidige_tijd - start_tijd
+        if i %10 == 0:
+            print(f'rekentijd: {round(rekentijd, 1)}s', end='\r')
     return oplossing, improved
 
 def kook_gang_optimizer(oplossing: object, unieke_huis_combinaties: list, timeout_tijd: int) -> (object, bool):
@@ -197,9 +200,12 @@ def kook_gang_optimizer(oplossing: object, unieke_huis_combinaties: list, timeou
         scorehuidig, _ = bereken_doelfunctie(oplossing)
         if (scorenieuw > scorehuidig) and feasible:
             logger.debug(msg=f"*kook_gang_optimizer* Bij iteratie: {i}, Nieuwe oplossing score van: {scorenieuw} > {scorehuidig}, {unieke_huis_combinaties[i][0]} en {unieke_huis_combinaties[i][1]} zijn hiervoor gewisselt.")
+            print(f"*kook_gang_optimizer* Bij iteratie: {i}, Nieuwe oplossing score van: {scorenieuw} > {scorehuidig}, {unieke_huis_combinaties[i][0]} en {unieke_huis_combinaties[i][1]} zijn hiervoor gewisselt.")
             improved = True
             return nieuwe_oplossing, improved
         i += 1
         huidige_tijd = time.time()
         rekentijd = huidige_tijd - start_tijd
+        if i %10 == 0:
+            print(f'rekentijd: {round(rekentijd, 1)}s, iteratie: {i}', end='\r')
     return oplossing, improved

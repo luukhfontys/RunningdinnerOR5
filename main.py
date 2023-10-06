@@ -4,11 +4,11 @@ from logger_utils import logger
 from Functions import ingest_deelnemers, ingest_huizen, ingest_startoplossing, ingest_tafelgenoten_2_jaar_geleden, bereken_doelfunctie, generate_uniek, export_oplossing, kook_gang_optimizer, eet_gang_optimizer
 
 def main():
-    timeout_tijd = 360 #seconden
+    timeout_tijd = 600 #seconden
     start_tijd = time.time()
     file_path = 'Running Dinner dataset 2023 v2.xlsx'
     file_path_vorigjaar = 'Running Dinner dataset 2022.xlsx'
-    startoplossing_path = 'Running Dinner tweede oplossing 2023 v2.xlsx'
+    startoplossing_path = 'Planning geoptimaliseerd, -968 0.3m.xlsx'
 
     #deelnemers in dictionary zetten
     deelnemers = ingest_deelnemers(file_path)
