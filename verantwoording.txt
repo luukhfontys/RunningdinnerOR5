@@ -1,0 +1,3 @@
+--
+Optimizer kies randomly om een eet_gang of kook_gang te wisselen. Als de ene te lang duurt proberen we de andere ook.
+als die ook te lang duurt stopt het optimaliseren en wordt er de uitslag gepresenteerd in excel met score en reken tijd in de naam.
