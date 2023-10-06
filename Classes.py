@@ -113,7 +113,10 @@ class Oplossing:
         self.wens6_berekening()
     
     def wens1_berekening(self): #Twee verschillende deelnemers zijn zo weinig mogelijk keer elkaars tafelgenoten; het liefstmaximaal één keer. Dit geldt zeker voor deelnemers uit hetzelfde huishouden.
-        """Returned een dictionary met key='Deelnemer': [[Bewoners], [Aantal keer tafelgenoot per bewoner]]"""
+        """
+        Returned een dictionary met key='Deelnemer': [[Bewoners], [Aantal keer tafelgenoot per bewoner]]
+        als de twee deelnemers huisgenoten blijken te zijn wordt de straf score x5 gedaan.
+        """
         self.tafelgenoot_aantal = dict()
         self.Score_wens1 = 0
         for deelnemer1 in self.oplossing:
@@ -125,6 +128,8 @@ class Oplossing:
                     if overlap_count > 0:
                         self.tafelgenoot_aantal[deelnemer1][0].append(deelnemer2)
                         self.tafelgenoot_aantal[deelnemer1][1].append(overlap_count)
+                        if deelnemer2 in self.huizen[self.deelnemers[deelnemer2].adres].bewoners:
+                            overlap_count * 5
                         self.Score_wens1 -= overlap_count - 1
         return self.Score_wens1, self.tafelgenoot_aantal
     
