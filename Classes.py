@@ -1,5 +1,4 @@
 import numpy as np
-import pdb
 
 class Oplossing:
     def __init__(self, deelnemers: dict, huizen: dict):
@@ -116,17 +115,17 @@ class Oplossing:
     def wens1_berekening(self): #Twee verschillende deelnemers zijn zo weinig mogelijk keer elkaars tafelgenoten; het liefstmaximaal één keer. Dit geldt zeker voor deelnemers uit hetzelfde huishouden.
         """Returned een dictionary met key='Deelnemer': [[Bewoners], [Aantal keer tafelgenoot per bewoner]]"""
         self.tafelgenoot_aantal = dict()
-        
         self.Score_wens1 = 0
         for deelnemer1 in self.oplossing:
             self.tafelgenoot_aantal[deelnemer1] = [[], []]
             for deelnemer2 in self.oplossing:
-                tafel_overlap_set = set(self.oplossing[deelnemer1][1:4]).intersection(self.oplossing[deelnemer2][1:4])
-                if (deelnemer1 != deelnemer2) and len(tafel_overlap_set) > 0:
-                    self.tafelgenoot_aantal[deelnemer1][0].append(deelnemer2)
-                    self.tafelgenoot_aantal[deelnemer1][1].append(len(tafel_overlap_set))
-                    self.Score_wens1 -= len(tafel_overlap_set) - 1
-    
+                if deelnemer1 != deelnemer2:
+                    tafel_overlap_set = set(self.oplossing[deelnemer1][1:4]).intersection(self.oplossing[deelnemer2][1:4])
+                    overlap_count = len(tafel_overlap_set)
+                    if overlap_count > 0:
+                        self.tafelgenoot_aantal[deelnemer1][0].append(deelnemer2)
+                        self.tafelgenoot_aantal[deelnemer1][1].append(overlap_count)
+                        self.Score_wens1 -= overlap_count - 1
         return self.Score_wens1, self.tafelgenoot_aantal
     
     def wens2_berekening(self): #Een huishouden dat in 2022 een hoofdgerecht bereid heeft, bereidt tijdens de komende Running Dinner geen hoofdgerecht.
@@ -278,6 +277,7 @@ class Oplossing:
         self.update_aantalgasten
         self.kookt_niet_op_eigen_adres
         self.not_in_capacity
+        self.sync_attributen
         return all([self.kookt_niet_op_eigen_adres + self.not_in_capacity[0] == 0])
     
 class Deelnemer:
