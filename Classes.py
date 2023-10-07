@@ -193,7 +193,6 @@ class Oplossing:
         Opmerkingen:
             Deze methode berekent de score en verzamelt tafelgenootinformatie volgens Wens 1.
             De score wordt bepaald op basis van hoe vaak deelnemers dezelfde tafelgenoten hebben.
-            Als twee deelnemers huisgenoten zijn, wordt de strafscore vermenigvuldigd met 5.
             De tafelgenootinformatie wordt opgeslagen in een dictionary met deelnemers als keys
             en lijsten van bewoners en tafelgenootaantallen als items.
         """
@@ -215,10 +214,6 @@ class Oplossing:
                         # Voeg deelnemer2 en het aantal keer dat ze tafelgenoten zijn toe aan de tafelgenootinformatie van deelnemer1, en de naam met wie ze tafelgenoot zijn.
                         self.tafelgenoot_aantal[deelnemer1][0].append(deelnemer2)
                         self.tafelgenoot_aantal[deelnemer1][1].append(overlap_count)
-                        
-                        # Als deelnemer2 en deelnemer1 huisgenoten zijn, vermenigvuldig de overlap_count met 5. (Om huisgenoten bij elkaar zetten extra te ontmoedigen)
-                        if deelnemer2 in self.huizen[self.deelnemers[deelnemer2].adres].bewoners:
-                            overlap_count *= 5
                             
                         # Update de totale score volgens Wens 1.
                         self.Score_wens1 -= overlap_count - 1

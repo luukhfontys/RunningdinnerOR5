@@ -8,6 +8,44 @@ from Classes import Deelnemer, Huis, Oplossing
 
 logger = logging.getLogger(name='2opt-logger')
 
+def main_optimizer(huidige_oplossing , timeout_tijd) -> object:
+    
+    deelnemer_namen = [deelnemer for deelnemer in huidige_oplossing.deelnemers]
+    #Hier worden huizen die vrijstelling hebben meteen eruit gefiltert
+    huis_adressen = [huis for huis in huidige_oplossing.huizen if not huidige_oplossing.huizen[huis].kook_vrijstelling]
+    gangen = ['Voor', 'Hoofd', 'Na']
+    
+    unieke_deelnemer_combinaties = generate_uniek(deelnemer_namen)
+    unieke_huis_combinaties = generate_uniek(huis_adressen)
+    
+    stuck = False
+    while stuck == False:
+        keuzegetal = random.choice(['eet_gang', 'kook_gang'])
+        
+        if keuzegetal == 'eet_gang':
+            huidige_oplossing, improvedeet = eet_gang_optimizer(huidige_oplossing, unieke_deelnemer_combinaties, gangen, timeout_tijd)
+            if improvedeet == False:
+                logger.debug(msg=f"*eet_gang_optimizer* Timeout: {timeout_tijd}s trying kook_gang_optimizer")
+                print(f"*eet_gang_optimizer* Timeout: {timeout_tijd}s trying kook_gang_optimizer")
+                huidige_oplossing, improvedkook = kook_gang_optimizer(huidige_oplossing, unieke_huis_combinaties, timeout_tijd)
+                if improvedkook == False:
+                    logger.debug(msg=f"*kook_gang_optimizer* Timeout: {timeout_tijd}s Optimizer stopping ...")
+                    print(f"*kook_gang_optimizer* Timeout: {timeout_tijd}s Optimizer stopping ...")
+                    stuck = True
+        
+        if keuzegetal == 'kook_gang':
+            huidige_oplossing, improvedkook = kook_gang_optimizer(huidige_oplossing, unieke_huis_combinaties, timeout_tijd)
+            if improvedkook == False:
+                logger.debug(msg=f"*kook_gang_optimizer* Timeout: {timeout_tijd}s trying eet_gang_optimizer")
+                print(f"*kook_gang_optimizer* Timeout: {timeout_tijd}s trying eet_gang_optimizer")
+                huidige_oplossing, improvedeet = eet_gang_optimizer(huidige_oplossing, unieke_deelnemer_combinaties, gangen, timeout_tijd)
+                if improvedeet == False:
+                    logger.debug(msg=f"*eet_gang_optimize* Timeout: {timeout_tijd}s Optimizer stopping ...")
+                    print(f"*eet_gang_optimize* Timeout: {timeout_tijd}s Optimizer stopping ...")
+                    stuck = True
+                    
+    return huidige_oplossing
+
 def ingest_deelnemers(file_path: str) -> dict:
     """Deze functie neemt een excel file path, stopt de bijbehorende excel file vervolgens in een DataFrame 
     en daarna wordt alle deelnemer informatie in een dictionary van objecten geplaatst.
@@ -270,15 +308,36 @@ def kook_swap(oplossing: object, adres1: str, adres2: str):
     return nieuwe_oplossing
 
 def export_oplossing(oplossing, Score, rekentijd_minuten):
+    """
+    Exporteer de oplossing naar een Excel-bestand.
+
+    Parameters:
+        oplossing: De oplossing die moet worden geëxporteerd.
+        Score: De score van de oplossing.
+        rekentijd_minuten: De tijd die nodig was om de oplossing te berekenen in minuten.
+
+    Opmerkingen:
+        Deze functie maakt een DataFrame van de oplossing en voegt extra kolommen toe voor 'Huisadres'.
+        Vervolgens wordt het DataFrame geëxporteerd naar een Excel-bestand met een naam op basis van de score
+        en de berekende rekentijd.
+    """
+    
+    #Maak een DataFrame van de oplossing
     df_oplossing = pd.DataFrame.from_dict(oplossing.oplossing, orient='index')
     df_oplossing = df_oplossing.reset_index()
     df_oplossing.columns = ['Bewoner' , 'kookt', 'Voor', 'Hoofd', 'Na', 'aantal']
+    
+    #Wijzig de kolomvolgorde om 'kookt' op de tweede positie te plaatsen
     df_oplossing.insert(4, 'kookt', df_oplossing.pop('kookt'))
+    
+    # Voeg een kolom 'Huisadres' toe op basis van de adresgegevens van de bewoners
     df_oplossing.insert(1, 'Huisadres', '')
     for i in range(len(df_oplossing['Bewoner'])):
         bewoner = df_oplossing['Bewoner'][i]
         adres = oplossing.deelnemers[bewoner].adres
         df_oplossing.at[i, 'Huisadres'] = adres
+    
+    # Exporteer het DataFrame naar een Excel-bestand met een naam op basis van de score en rekentijd
     df_oplossing.to_excel(f'Planning geoptimaliseerd, {Score[0]} {round(rekentijd_minuten, 1)}m.xlsx', index=True)
 
 def eet_gang_optimizer(oplossing: object, unieke_deelnemer_combinaties: list, gangen: list, timeout_tijd: int) -> (object, bool):
