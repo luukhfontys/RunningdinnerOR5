@@ -8,7 +8,7 @@ def main():
     start_tijd = time.time()
     file_path = 'Running Dinner dataset 2023 v2.xlsx'
     file_path_vorigjaar = 'Running Dinner dataset 2022.xlsx'
-    startoplossing_path = 'Planning geoptimaliseerd, -258 28.3m.xlsx'
+    startoplossing_path = 'Running Dinner eerste oplossing 2023 v2.xlsx'
 
     #deelnemers in dictionary zetten
     deelnemers = ingest_deelnemers(file_path)
