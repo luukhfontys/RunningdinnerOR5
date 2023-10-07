@@ -1,12 +1,12 @@
 import time
-from Functions import main_optimizer, ingest_deelnemers, ingest_huizen, ingest_startoplossing, ingest_tafelgenoten_2_jaar_geleden, bereken_doelfunctie, generate_uniek, export_oplossing, kook_gang_optimizer, eet_gang_optimizer
+from Functions import main_optimizer, ingest_deelnemers, ingest_huizen, ingest_startoplossing, ingest_tafelgenoten_2_jaar_geleden, bereken_doelfunctie, export_oplossing, export_performance_rapport
 
 def main():
-    timeout_tijd = 20 #seconden
+    timeout_tijd = 1 #seconden
     start_tijd = time.time()
     file_path = 'Running Dinner dataset 2023 v2.xlsx'
     file_path_vorigjaar = 'Running Dinner dataset 2022.xlsx'
-    startoplossing_path = 'Running Dinner eerste oplossing 2023 v2.xlsx'
+    startoplossing_path = 'Planning geoptimaliseerd, -258 0.7m.xlsx'
 
     #deelnemers in dictionary zetten
     deelnemers = ingest_deelnemers(file_path)
@@ -29,6 +29,7 @@ def main():
     #Exporteer oplossing naar excel en print de uiteindelijke score in de terminal
     Score = bereken_doelfunctie(optimized_oplossing)
     export_oplossing(optimized_oplossing, Score, rekenminuten)
+    export_performance_rapport(optimized_oplossing, Score, rekenminuten)
     print(Score)
 
 if __name__ == '__main__':

@@ -214,9 +214,15 @@ class Oplossing:
                         # Voeg deelnemer2 en het aantal keer dat ze tafelgenoten zijn toe aan de tafelgenootinformatie van deelnemer1, en de naam met wie ze tafelgenoot zijn.
                         self.tafelgenoot_aantal[deelnemer1][0].append(deelnemer2)
                         self.tafelgenoot_aantal[deelnemer1][1].append(overlap_count)
-                            
-                        # Update de totale score volgens Wens 1.
-                        self.Score_wens1 -= overlap_count - 1
+                        
+                        #Checkt of deelnemers bij elkaar moeten blijven, zo ja dan wordt er niet gestraft omdat ze bij elkaar zitten.
+                        if self.deelnemers[deelnemer1].bijelkaarblijven is None:
+                            #Update de totale score volgens Wens 1.
+                            self.Score_wens1 -= overlap_count - 1
+                        elif self.deelnemers[deelnemer1].bijelkaarblijven.naam != deelnemer2:
+                            #Update de totale score volgens Wens 1.
+                            self.Score_wens1 -= overlap_count - 1
+                        
         return self.Score_wens1, self.tafelgenoot_aantal
     
     def wens2_berekening(self) -> (int, list):
@@ -431,6 +437,14 @@ class Oplossing:
                 # Tel hoe vaak de adreswaarde van de bewoner voorkomt in de lijsten van andere bewoners
                 self.oplossing[deelnemer][4] += lijst.count(self.deelnemers[deelnemer].adres)
     
+    def totaal_aantal_voorkeuren_huishouden(self):
+        """Deze property berekent het totaal aantal voorkeuren aangegeven door elk huis."""
+        totaal_aantal_voorkeuren_huishouden = 0
+        for huis in self.huizen:
+            if self.huizen[huis].gang_voorkeur is not None:
+                totaal_aantal_voorkeuren_huishouden += 1
+        return totaal_aantal_voorkeuren_huishouden
+
     def create_swap_map(self, bewonersadres1: list, bewonersadres2: list) -> dict:
         """
         Deze functie zorgt ervoor dat 2 mensen met 1 persoon van gangen kunnen wisselen door de

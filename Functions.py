@@ -222,7 +222,7 @@ def ingest_startoplossing(deelnemers: dict, huizen: dict, startoplossing_path: s
 
     return oplossing
 
-def bereken_doelfunctie(oplossing: object):
+def bereken_doelfunctie(oplossing: object) -> (int, bool):
     oplossing.Bereken_alle_wensen()
     feasible = oplossing.feasible()
     Score = oplossing.doelfunctie
@@ -339,7 +339,22 @@ def export_oplossing(oplossing, Score, rekentijd_minuten):
     
     # Exporteer het DataFrame naar een Excel-bestand met een naam op basis van de score en rekentijd
     df_oplossing.to_excel(f'Planning geoptimaliseerd, {Score[0]} {round(rekentijd_minuten, 1)}m.xlsx', index=True)
-
+    
+def export_performance_rapport(oplossing: object, Score, rekentijd_minuten):
+    
+    #Alle waardes pakken, in geval van score 3, kijken hoeveel er niet een voorkeursgang kregen
+    performance_waardes = [oplossing.Score_wens1, oplossing.Score_wens2, oplossing.totaal_aantal_voorkeuren_huishouden() - oplossing.Score_wens3, 
+                           oplossing.Score_wens4, oplossing.Score_wens5, oplossing.Score_wens6]
+    performance_waardes = [abs(waarde) for waarde in performance_waardes]
+    
+    Descriptors = ['Aantal huishoudens dat niet het voorkeursgerecht krijgt toegewezen', 'Aantal huishoudens dat wederom een hoofdgerecht moet bereiden', 'Aantal huishoudens dat niet het voorkeursgerecht krijgt toegewezen', 'Aantal keer dat deelnemers wederom als voorgaand jaar samen eten', 'Aantal keer dat buren samen eten', 'Aantal keer dat deelnemers wederom als 2 jaar geleden samen eten']
+    
+    data = {'Wens': Descriptors,
+            'data': performance_waardes}
+    
+    df_performance_rapport = pd.DataFrame(data)
+    df_performance_rapport.to_excel(f'Performance rapport, {Score[0]} {round(rekentijd_minuten, 1)}m.xlsx')
+    
 def eet_gang_optimizer(oplossing: object, unieke_deelnemer_combinaties: list, gangen: list, timeout_tijd: int) -> (object, bool):
     """
     Optimaliseerd oplossing door willekeurig eet gangen te wisselen en kijken of de doel score verbeterd of niet.
