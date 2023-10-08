@@ -8,7 +8,10 @@ from Classes import Deelnemer, Huis, Oplossing
 
 logger = logging.getLogger(name='2opt-logger')
 
-def main_optimizer(huidige_oplossing , timeout_tijd) -> object:
+def main_optimizer(huidige_oplossing, timeout_tijd, maximale_rekentijd) -> object:
+    
+    start_tijd = time.time()
+    rekentijd = 0
     
     deelnemer_namen = [deelnemer for deelnemer in huidige_oplossing.deelnemers]
     #Hier worden huizen die vrijstelling hebben meteen eruit gefiltert
@@ -19,8 +22,11 @@ def main_optimizer(huidige_oplossing , timeout_tijd) -> object:
     unieke_huis_combinaties = generate_uniek(huis_adressen)
     
     stuck = False
-    while stuck == False:
+    while (stuck == False) and (rekentijd < maximale_rekentijd):
         keuzegetal = random.choice(['eet_gang', 'kook_gang'])
+        
+        huidige_tijd = time.time()
+        rekentijd = huidige_tijd - start_tijd
         
         if keuzegetal == 'eet_gang':
             huidige_oplossing, improvedeet = eet_gang_optimizer(huidige_oplossing, unieke_deelnemer_combinaties, gangen, timeout_tijd)
@@ -191,18 +197,27 @@ def ingest_huizen(file_path: str) -> dict:
     
     return huizen
 
-def ingest_startoplossing(deelnemers: dict, huizen: dict, startoplossing_path: str) -> object:
+def ingest_startoplossing(dataset_file_path: str, dataset_file_path_vorigjaar: str, startoplossing_path: str) -> object:
     """Deze functie neemt een start oplossing excel file path en stopt de bijbehorende excel file vervolgens in een DataFrame.
     deze informatie wordt in opgeslagen in een oplossing object samen met alle statische informatie van deelnemers en huizen dictionaries.
     
     Parameters:
-        deelnemers (dict): Dictionary met deelnemer objecten waarvan key = deelnemer.naam
-        huizen (dict): Dictionary met huis objecten waarvan key = huis.adres
+        dataset_file_path (str): string met de locatie van de dataset file
+        dataset_file_path_vorigjaar (str): string met de locatie van de dataset file van vorig jaar
         startoplossing_path (str): Bestand locatie van de start oplossing excel file
         
     Returns:
         object: Oplossing object met een start planning en alle informatie over de deelnemers en huizen.
     """
+    
+    #deelnemers in dictionary zetten
+    deelnemers = ingest_deelnemers(dataset_file_path)
+    #Data 2 jaar geleden laden indien deze is gegeven
+    if dataset_file_path_vorigjaar is not None:
+        deelnemers = ingest_tafelgenoten_2_jaar_geleden(dataset_file_path_vorigjaar, deelnemers)
+    #Huizen in dictionary zetten
+    huizen = ingest_huizen(dataset_file_path)
+    
     #Start oplossing in dataframe zetten
     df_startoplossing = pd.read_excel(startoplossing_path)
 
@@ -340,6 +355,9 @@ def export_oplossing(oplossing, Score, rekentijd_minuten):
     # Exporteer het DataFrame naar een Excel-bestand met een naam op basis van de score en rekentijd
     df_oplossing.to_excel(f'Planning geoptimaliseerd, {Score[0]} {round(rekentijd_minuten, 1)}m.xlsx', index=True)
     
+    #In de terminal de uiteindelijke score printen
+    print(Score)
+    
 def export_performance_rapport(oplossing: object, Score, rekentijd_minuten):
     
     #Alle waardes pakken, in geval van score 3, kijken hoeveel er niet een voorkeursgang kregen
@@ -380,7 +398,7 @@ def eet_gang_optimizer(oplossing: object, unieke_deelnemer_combinaties: list, ga
     
     #Terwijl de oplossing niet verbeterd, we niet door alle combinaties heen zijn 
     #en de rekentijd niet over de timeout tijd is gegaan, blijf loopen.
-    while not improved and (i < len(unieke_deelnemer_combinaties)) and (rekentijd < timeout_tijd):
+    while not improved and (i < len(unieke_deelnemer_combinaties) * 3) and (rekentijd < timeout_tijd):
         
         #Voor elke unieke deelnemer combinatie check elke gang.
         for gang in gangen:
@@ -405,16 +423,16 @@ def eet_gang_optimizer(oplossing: object, unieke_deelnemer_combinaties: list, ga
                 improved = True
                 return nieuwe_oplossing, improved
         
-        #Als oplossing niet verbeterd iteration +1
-        i += 1
+            #Als oplossing niet verbeterd iteration +1
+            i += 1
         
-        #Kijken hoe lang we al aan het rekenen zijn voor huidige optimalisatie poging
-        huidige_tijd = time.time()
-        rekentijd = huidige_tijd - start_tijd
+            #Kijken hoe lang we al aan het rekenen zijn voor huidige optimalisatie poging
+            huidige_tijd = time.time()
+            rekentijd = huidige_tijd - start_tijd
         
-        #Voor elke 10 iteraties, print de rekentijd van de huidige optimalisatie poging, de iteratie en de optimizer de gebruikt wordt in de terminal
-        if i %10 == 0:
-            print(f'rekentijd: {round(rekentijd, 1)}s, iteratie: {i}, optimizer: eet gang', end='\r')
+            #Voor elke 10 iteraties, print de rekentijd van de huidige optimalisatie poging, de iteratie en de optimizer de gebruikt wordt in de terminal
+            if i %10 == 0:
+                print(f'rekentijd: {round(rekentijd, 1)}s, iteratie: {i}, optimizer: eet gang', end='\r')
     
     #Als er geen optimalisatie binnen de time out tijd kon worden gevonden, return oplossing en improved = False
     return oplossing, improved

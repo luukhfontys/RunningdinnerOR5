@@ -1,4 +1,4 @@
-import numpy as np
+import pandas as pd
 
 class Oplossing:
     def __init__(self, deelnemers: dict, huizen: dict):
@@ -521,10 +521,41 @@ class Oplossing:
             if not vrijstelling:
                 
                 # Controleer of de bewoner kookt op zijn eigen adres
-                if eigenadres != self.oplossing[deelnemer][self.gangindex[kookgang]]:
-                    kookt_niet_count += 1
+                try:
+                    if eigenadres != self.oplossing[deelnemer][self.gangindex[kookgang]]:
+                        kookt_niet_count += 1
+                except KeyError as e:
+                    print(f'Persoon zonder vrijstelling: {deelnemer} kookt niet -> kookgang: {e}')
                     
         return kookt_niet_count
+    
+    @property
+    def aantal_personen_niet_ingedeeld(self):
+        aantal_personen_niet_ingedeeld = 0
+        
+        for deelnemer in self.oplossing:
+            if pd.isna(self.oplossing[deelnemer][1:4]).any():
+                aantal_personen_niet_ingedeeld += 1
+        return aantal_personen_niet_ingedeeld
+    
+    @property
+    def aantal_personen_dat_niet_kookt_maar_wel_moet(self):
+        aantal_personen_dat_niet_kookt_maar_wel_moet = 0
+        for deelnemer in self.oplossing:
+            kookgang = self.oplossing[deelnemer][0]
+            vrijgesteld = self.huizen[self.deelnemers[deelnemer].adres].kook_vrijstelling
+            if pd.isna(kookgang) and not vrijgesteld:
+                aantal_personen_dat_niet_kookt_maar_wel_moet += 1
+        return aantal_personen_dat_niet_kookt_maar_wel_moet
+    
+    @property
+    def aantal_personen_dat_bijelkaar_moet_blijven_maar_dit_niet_zijn(self):
+        aantal_personen_dat_bijelkaar_moet_blijven_maar_dit_niet_zijn = 0
+        for deelnemer in self.oplossing:
+            if self.deelnemers[deelnemer].bijelkaarblijven is not None:
+                if not self.oplossing[deelnemer][1:4] == self.oplossing[self.deelnemers[deelnemer].bijelkaarblijven.naam][1:4]:
+                    aantal_personen_dat_bijelkaar_moet_blijven_maar_dit_niet_zijn += 1
+        return aantal_personen_dat_bijelkaar_moet_blijven_maar_dit_niet_zijn
     
     #Feasibility van huidige oplossing
     
@@ -550,6 +581,9 @@ class Oplossing:
         self.update_aantalgasten
         self.kookt_niet_op_eigen_adres
         self.not_in_capacity
+        self.aantal_personen_niet_ingedeeld
+        self.aantal_personen_dat_niet_kookt_maar_wel_moet
+        self.aantal_personen_dat_bijelkaar_moet_blijven_maar_dit_niet_zijn
         
         #Controleer of er geen overtredingen zijn (koken op eigen adres en capaciteit)
         return all([self.kookt_niet_op_eigen_adres + self.not_in_capacity[0] == 0])

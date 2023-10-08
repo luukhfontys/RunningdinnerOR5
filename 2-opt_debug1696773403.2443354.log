@@ -1,0 +1,17 @@
+[2023-10-08 15:56:43,681] *eet_gang_optimizer* Bij iteratie: 0, Nieuwe oplossing score van: -1683 > -1744, VW_15_M_Ger en WO_16_V_Lie zijn hiervoor gewisselt.
+[2023-10-08 15:56:43,718] *kook_gang_optimizer* Bij iteratie: 0, Nieuwe oplossing score van: -1679 > -1683, VW_72 en WO_26 zijn hiervoor gewisselt.
+[2023-10-08 15:56:43,892] *kook_gang_optimizer* Bij iteratie: 4, Nieuwe oplossing score van: -1635 > -1679, VW_70 en WO_85 zijn hiervoor gewisselt.
+[2023-10-08 15:56:43,963] *kook_gang_optimizer* Bij iteratie: 1, Nieuwe oplossing score van: -1605 > -1635, VW_35 en VW_72 zijn hiervoor gewisselt.
+[2023-10-08 15:56:44,070] *kook_gang_optimizer* Bij iteratie: 2, Nieuwe oplossing score van: -1600 > -1605, WO_32 en WO_77 zijn hiervoor gewisselt.
+[2023-10-08 15:56:44,216] *eet_gang_optimizer* Bij iteratie: 3, Nieuwe oplossing score van: -1588 > -1600, VW_25_M_Joo en VW_35_V_Ros zijn hiervoor gewisselt.
+[2023-10-08 15:56:44,252] *kook_gang_optimizer* Bij iteratie: 0, Nieuwe oplossing score van: -1569 > -1588, VW_32 en WO_41 zijn hiervoor gewisselt.
+[2023-10-08 15:56:44,357] *kook_gang_optimizer* Bij iteratie: 2, Nieuwe oplossing score van: -1552 > -1569, VW_70 en WO_77 zijn hiervoor gewisselt.
+[2023-10-08 15:56:44,394] *kook_gang_optimizer* Bij iteratie: 0, Nieuwe oplossing score van: -1539 > -1552, WO_32 en WO_51 zijn hiervoor gewisselt.
+[2023-10-08 15:56:44,505] *eet_gang_optimizer* Bij iteratie: 2, Nieuwe oplossing score van: -1527 > -1539, NEW_3_V_Mel en VW_57_V_Ann zijn hiervoor gewisselt.
+[2023-10-08 15:56:44,721] *kook_gang_optimizer* Bij iteratie: 5, Nieuwe oplossing score van: -1480 > -1527, WO_16 en WO_32 zijn hiervoor gewisselt.
+[2023-10-08 15:56:45,019] *eet_gang_optimizer* Bij iteratie: 7, Nieuwe oplossing score van: -1479 > -1480, NEW_3_M_Rob en WO_32_M_Ber zijn hiervoor gewisselt.
+[2023-10-08 15:56:45,128] *eet_gang_optimizer* Bij iteratie: 2, Nieuwe oplossing score van: -1451 > -1479, VW_46_V_Bre en VW_68_M_Chr zijn hiervoor gewisselt.
+[2023-10-08 15:56:45,272] *kook_gang_optimizer* Bij iteratie: 3, Nieuwe oplossing score van: -1439 > -1451, WO_50 en WO_55 zijn hiervoor gewisselt.
+[2023-10-08 15:56:45,697] *kook_gang_optimizer* Bij iteratie: 11, Nieuwe oplossing score van: -1415 > -1439, VW_25 en VW_70 zijn hiervoor gewisselt.
+[2023-10-08 15:56:45,734] *kook_gang_optimizer* Bij iteratie: 0, Nieuwe oplossing score van: -1395 > -1415, WO_38 en WO_45 zijn hiervoor gewisselt.
+[2023-10-08 15:56:46,439] *eet_gang_optimizer* Bij iteratie: 17, Nieuwe oplossing score van: -1383 > -1395, VW_12_M_Pet en VW_23_M_Lar zijn hiervoor gewisselt.
