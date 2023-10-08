@@ -18,6 +18,9 @@ def main_optimizer(huidige_oplossing, timeout_tijd, maximale_rekentijd) -> objec
     huis_adressen = [huis for huis in huidige_oplossing.huizen if not huidige_oplossing.huizen[huis].kook_vrijstelling]
     gangen = ['Voor', 'Hoofd', 'Na']
     
+    test_data = {'Tijd': [],
+                 'Doelscore': []}
+    
     unieke_deelnemer_combinaties = generate_uniek(deelnemer_namen)
     unieke_huis_combinaties = generate_uniek(huis_adressen)
     
@@ -50,7 +53,11 @@ def main_optimizer(huidige_oplossing, timeout_tijd, maximale_rekentijd) -> objec
                     print(f"*eet_gang_optimize* Timeout: {timeout_tijd}s Optimizer stopping ...")
                     stuck = True
                     
-    return huidige_oplossing
+        ####Data voor latere analyse opslaan ###Testing
+        test_data['Tijd'].append(time.time())
+        test_data['Doelscore'].append(bereken_doelfunctie(huidige_oplossing)[0])
+        ###
+    return huidige_oplossing, test_data
 
 def ingest_deelnemers(file_path: str) -> dict:
     """Deze functie neemt een excel file path, stopt de bijbehorende excel file vervolgens in een DataFrame 
@@ -365,10 +372,20 @@ def export_performance_rapport(oplossing: object, Score, rekentijd_minuten):
                            oplossing.Score_wens4, oplossing.Score_wens5, oplossing.Score_wens6]
     performance_waardes = [abs(waarde) for waarde in performance_waardes]
     
-    Descriptors = ['Aantal huishoudens dat niet het voorkeursgerecht krijgt toegewezen', 'Aantal huishoudens dat wederom een hoofdgerecht moet bereiden', 'Aantal huishoudens dat niet het voorkeursgerecht krijgt toegewezen', 'Aantal keer dat deelnemers wederom als voorgaand jaar samen eten', 'Aantal keer dat buren samen eten', 'Aantal keer dat deelnemers wederom als 2 jaar geleden samen eten']
+    Eis_waardes = [oplossing.aantal_personen_niet_ingedeeld, oplossing.aantal_personen_dat_niet_kookt_maar_wel_moet,
+                   oplossing.kookt_niet_op_eigen_adres, oplossing.not_in_capacity[0], oplossing.aantal_personen_dat_bijelkaar_moet_blijven_maar_dit_niet_zijn, None]
+    
+    Eis_descriptors = ['Aantal personen dat niet is ingedeeld op één of meer gangen', 'Aantal personen dat zonder vrijstelling toch niet kookt',
+                       'Aantal personen dat niet op eigen adres staat ingedeeld voor de gang die deze deelnemer moet koken',
+                       'Aantal keren dat het minimum of maximum aantal gasten wordt geschonden (mensen met vrijstelling hebben min en max van 0)',
+                       'Aantal keren dat duos die bij elkaar moeten blijven niet bij elkaar blijven', None]
+    
+    Descriptors = ['Aantal personen dat vaker dan 1 keer bij elkaar aan tafel zitten:', 'Aantal huishoudens dat wederom een hoofdgerecht moet bereiden', 'Aantal huishoudens dat niet het voorkeursgerecht krijgt toegewezen', 'Aantal keer dat deelnemers wederom als voorgaand jaar samen eten', 'Aantal keer dat buren samen eten', 'Aantal keer dat deelnemers wederom als 2 jaar geleden samen eten']
     
     data = {'Wens': Descriptors,
-            'data': performance_waardes}
+            'Wens data': performance_waardes,
+            'Eis': Eis_descriptors,
+            'Eis data': Eis_waardes}
     
     df_performance_rapport = pd.DataFrame(data)
     df_performance_rapport.to_excel(f'Performance rapport, {Score[0]} {round(rekentijd_minuten, 1)}m.xlsx')
@@ -393,12 +410,13 @@ def eet_gang_optimizer(oplossing: object, unieke_deelnemer_combinaties: list, ga
     #Initialiseer waardes
     improved = False
     i = 0
+    j = 0
     start_tijd = time.time()
     rekentijd = 0
     
     #Terwijl de oplossing niet verbeterd, we niet door alle combinaties heen zijn 
     #en de rekentijd niet over de timeout tijd is gegaan, blijf loopen.
-    while not improved and (i < len(unieke_deelnemer_combinaties) * 3) and (rekentijd < timeout_tijd):
+    while not improved and (i < len(unieke_deelnemer_combinaties)) and (rekentijd < timeout_tijd):
         
         #Voor elke unieke deelnemer combinatie check elke gang.
         for gang in gangen:
@@ -416,24 +434,24 @@ def eet_gang_optimizer(oplossing: object, unieke_deelnemer_combinaties: list, ga
             if (scorenieuw > scorehuidig) and feasible:
                 
                 #Nieuwe vondst in een debug .log zetten en printen in de terminal
-                logger.debug(msg=f"*eet_gang_optimizer* Bij iteratie: {i}, Nieuwe oplossing score van: {scorenieuw} > {scorehuidig}, {unieke_deelnemer_combinaties[i][0]} en {unieke_deelnemer_combinaties[i][1]} zijn hiervoor gewisselt.")
-                print(f"*eet_gang_optimizer* Bij iteratie: {i}, Nieuwe oplossing score van: {scorenieuw} > {scorehuidig}, {unieke_deelnemer_combinaties[i][0]} en {unieke_deelnemer_combinaties[i][1]} zijn hiervoor gewisselt.")
+                logger.debug(msg=f"*eet_gang_optimizer* Bij iteratie: {j}, Nieuwe oplossing score van: {scorenieuw} > {scorehuidig}, {unieke_deelnemer_combinaties[i][0]} en {unieke_deelnemer_combinaties[i][1]} zijn hiervoor gewisseld.")
+                print(f"*eet_gang_optimizer* Bij iteratie: {j}, Nieuwe oplossing score van: {scorenieuw} > {scorehuidig}, {unieke_deelnemer_combinaties[i][0]} en {unieke_deelnemer_combinaties[i][1]} zijn hiervoor gewisseld.")
                 
                 #improved naar waar zetten en vervolgens nieuwe oplossing en improved returnen.
                 improved = True
                 return nieuwe_oplossing, improved
         
-            #Als oplossing niet verbeterd iteration +1
-            i += 1
-        
             #Kijken hoe lang we al aan het rekenen zijn voor huidige optimalisatie poging
             huidige_tijd = time.time()
             rekentijd = huidige_tijd - start_tijd
-        
-            #Voor elke 10 iteraties, print de rekentijd van de huidige optimalisatie poging, de iteratie en de optimizer de gebruikt wordt in de terminal
-            if i %10 == 0:
+            
+            j += 1
+            #Voor elke 10 gangen, print de rekentijd van de huidige optimalisatie poging, de iteratie en de optimizer die gebruikt wordt in de terminal
+            if j %10 == 0:
                 print(f'rekentijd: {round(rekentijd, 1)}s, iteratie: {i}, optimizer: eet gang', end='\r')
-    
+        
+        #Als oplossing niet verbeterd iteration +1
+        i += 1
     #Als er geen optimalisatie binnen de time out tijd kon worden gevonden, return oplossing en improved = False
     return oplossing, improved
 
@@ -450,7 +468,6 @@ def kook_gang_optimizer(oplossing: object, unieke_huis_combinaties: list, timeou
     Returns:
         tuple: Een tuple bestaande uit de geoptimaliseerde oplossing en een boolean die aangeeft of de oplossing is verbeterd.
     """
-    
     
     #Shuffle combinaties voor random volgorde van 2-opt
     random.shuffle(unieke_huis_combinaties)
@@ -478,8 +495,8 @@ def kook_gang_optimizer(oplossing: object, unieke_huis_combinaties: list, timeou
         if (scorenieuw > scorehuidig) and feasible:
             
             #Nieuwe vondst in een debug .log zetten en printen in de terminal
-            logger.debug(msg=f"*kook_gang_optimizer* Bij iteratie: {i}, Nieuwe oplossing score van: {scorenieuw} > {scorehuidig}, {unieke_huis_combinaties[i][0]} en {unieke_huis_combinaties[i][1]} zijn hiervoor gewisselt.")
-            print(f"*kook_gang_optimizer* Bij iteratie: {i}, Nieuwe oplossing score van: {scorenieuw} > {scorehuidig}, {unieke_huis_combinaties[i][0]} en {unieke_huis_combinaties[i][1]} zijn hiervoor gewisselt.")
+            logger.debug(msg=f"*kook_gang_optimizer* Bij iteratie: {i}, Nieuwe oplossing score van: {scorenieuw} > {scorehuidig}, {unieke_huis_combinaties[i][0]} en {unieke_huis_combinaties[i][1]} zijn hiervoor gewisseld.")
+            print(f"*kook_gang_optimizer* Bij iteratie: {i}, Nieuwe oplossing score van: {scorenieuw} > {scorehuidig}, {unieke_huis_combinaties[i][0]} en {unieke_huis_combinaties[i][1]} zijn hiervoor gewisseld.")
             
             #improved naar waar zetten en vervolgens nieuwe oplossing en improved returnen.
             improved = True

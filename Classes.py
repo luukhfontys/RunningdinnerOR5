@@ -585,8 +585,8 @@ class Oplossing:
         self.aantal_personen_dat_niet_kookt_maar_wel_moet
         self.aantal_personen_dat_bijelkaar_moet_blijven_maar_dit_niet_zijn
         
-        #Controleer of er geen overtredingen zijn (koken op eigen adres en capaciteit)
-        return all([self.kookt_niet_op_eigen_adres + self.not_in_capacity[0] == 0])
+        #Controleer of er geen overtredingen zijn
+        return all([self.kookt_niet_op_eigen_adres + self.not_in_capacity[0] + self.aantal_personen_niet_ingedeeld +  self.aantal_personen_dat_niet_kookt_maar_wel_moet + self.aantal_personen_dat_bijelkaar_moet_blijven_maar_dit_niet_zijn== 0])
     
 class Deelnemer:
     def __init__(self, naam, adres):
