@@ -50,5 +50,5 @@ def main():
     export_performance_rapport(optimized_oplossing, Score, rekenminuten)
     
 if __name__ == '__main__':
-    for i in range(20):
+    for i in range(30):
         main() 
